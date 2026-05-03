@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+
 import { Activity, Heart, Thermometer, Droplets, AlertTriangle, TrendingUp, Clock, FileText, Plus, X } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdmissionForm from '../components/AdmissionForm';
