@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, .light {
+    /* Primary / Secondary Colors */
+    --primary-color: #4D6BFF;
+    --primary-color-hover: #3A55DD;
+    --primary-color-light: rgba(77, 107, 255, 0.08);
+    --secondary-color: #8BA8FF;
+
+    /* Light Theme Text Colors */
+    --color-slate-950: 17 24 39;     /* #111827 - Primary */
+    --color-slate-900: 31 41 55;     
+    --color-slate-800: 55 65 81;     
+    --color-slate-700: 75 85 99;     
+    --color-slate-600: 91 100 117;   /* #5B6475 - Secondary */
+    --color-slate-500: 107 114 128;  
+    --color-slate-400: 154 163 178;  /* #9AA3B2 - Muted */
+    --color-slate-300: 209 213 219;  
+    --color-slate-200: 229 231 235;  
+    --color-slate-100: 243 244 246;  
+    --color-slate-50: 249 250 251;   
+  }
+
+  .dark {
+    /* Primary / Secondary Colors */
+    --primary-color: #4D6BFF;
+    --primary-color-hover: #5EA1FF;
+    --primary-color-light: rgba(77, 107, 255, 0.15);
+    --secondary-color: #7B8CFF;
+    
+    /* Dark Theme Text Colors */
+    --color-slate-50: 245 247 255;   /* #F5F7FF - Primary */
+    --color-slate-100: 228 232 245;
+    --color-slate-200: 184 192 212;  /* #B8C0D4 - Secondary */
+    --color-slate-300: 154 163 186;
+    --color-slate-400: 124 134 161;  /* #7C86A1 - Muted */
+    --color-slate-500: 94 105 136;
+    --color-slate-600: 70 80 109;
+    --color-slate-700: 45 55 82;  
+    --color-slate-800: 25 33 55;   
+    --color-slate-900: 15 22 40;   
+    --color-slate-950: 5 8 22;     
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased transition-colors duration-300;
+    
+    /* Dark Mode Deep Navy/Black Gradient */
+    background: radial-gradient(circle at 10% 20%, #101935 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, #091224 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #0B1020 0%, #050816 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .light body {
+    /* Light Mode Soft Foggy Gradient */
+    background: radial-gradient(circle at 15% 15%, #DDEEF7 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, #CFE5F3 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, #E9EDF7 0%, #F5F7FB 100%);
+    color: #111827;
+  }
+}
+
+/* Premium UI Utilities */
+@layer components {
+  /* Minimal UI Modals and Cards */
+  .glass-panel {
+    @apply bg-white/[0.55] dark:bg-[#0F1223]/[0.65] 
+           backdrop-blur-[20px] 
+           border border-white/[0.35] dark:border-[#4D6BFF]/[0.15] 
+           shadow-[0_12px_40px_-10px_rgba(0,0,0,0.06)] dark:shadow-[0_16px_50px_-12px_rgba(0,0,0,0.4)]
+           transition-all duration-300;
+  }
+
+  /* Thin glass navbar */
+  .glass-nav {
+    @apply bg-white/[0.65] dark:bg-[#0F1223]/[0.75] 
+           backdrop-blur-[24px] 
+           border-b border-white/[0.4] dark:border-[#4D6BFF]/[0.2] 
+           shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none;
+  }
+
+  /* Rounded Pill Buttons - Black CTA in light, Glossy black/blue in dark */
+  .btn-primary {
+    @apply bg-slate-900 dark:bg-gradient-to-r dark:from-[#0F1425] dark:to-[#17203A]
+           text-white font-bold py-3 px-8 rounded-full 
+           border border-transparent dark:border-[#4D6BFF]/30
+           transition-all duration-300 
+           hover:scale-[1.02] 
+           hover:shadow-[0_8px_25px_rgba(77,107,255,0.25)] dark:hover:shadow-[0_8px_30px_rgba(94,161,255,0.35)] 
+           active:scale-[0.98];
+  }
+
+  .glass-pill {
+    @apply bg-white/70 dark:bg-white/5 
+           backdrop-blur-xl 
+           border border-white/50 dark:border-white/10 
+           shadow-md rounded-full px-4 py-2;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-[#4D6BFF] to-[#8BA8FF] dark:to-[#5EA1FF] bg-clip-text text-transparent;
+  }
+
+  .glow-primary {
+    @apply shadow-[0_0_40px_rgba(77,107,255,0.3)] dark:shadow-[0_0_50px_rgba(94,161,255,0.4)];
+  }
+
+  /* Frosted Input Fields */
+  .glass-input {
+    @apply w-full bg-white/[0.45] dark:bg-[#0B1020]/[0.6]
+           border border-white/[0.45] dark:border-[#4D6BFF]/[0.2]
+           shadow-inner dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]
+           rounded-2xl py-3 px-4 
+           text-slate-900 dark:text-white 
+           placeholder:text-slate-500 dark:placeholder:text-slate-400
+           focus:outline-none focus:border-[#4D6BFF] dark:focus:border-[#5EA1FF] 
+           focus:ring-2 focus:ring-[#4D6BFF]/30 dark:focus:ring-[#5EA1FF]/30 
+           transition-all duration-300;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #9AA3B2;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4D6BFF;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8BA8FF;
+}
