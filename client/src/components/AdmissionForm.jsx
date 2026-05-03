@@ -25,7 +25,7 @@ const AdmissionForm = ({ isOpen, onClose }) => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/admissions', {
+      const response = await fetch('https://vitalsense-jvbd.onrender.com/api/admissions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

@@ -11,8 +11,8 @@ const Alerts = () => {
     const fetchAlerts = async () => {
       try {
         const endpoint = user.role === 'doctor' 
-          ? 'http://localhost:5000/api/doctor/alerts' 
-          : 'http://localhost:5000/api/patient/my-alerts';
+          ? 'https://vitalsense-jvbd.onrender.com/api/doctor/alerts' 
+          : 'https://vitalsense-jvbd.onrender.com/api/patient/my-alerts';
         
         const response = await fetch(endpoint, {
           headers: {

@@ -21,7 +21,7 @@ const Header = ({ setIsMobileMenuOpen }) => {
 
     const checkMessages = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/doctor/messages');
+        const res = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages');
         if (res.ok) {
           const data = await res.json();
           // Filter messages for current user

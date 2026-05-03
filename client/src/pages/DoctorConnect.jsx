@@ -13,7 +13,7 @@ const DoctorConnect = () => {
     // Fetch assigned doctor (using first available doctor for prototype)
     const fetchDoctor = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/doctor/list');
+        const res = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/list');
         if (res.ok) {
           const doctors = await res.json();
           if (doctors.length > 0) {
@@ -29,7 +29,7 @@ const DoctorConnect = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/doctor/messages');
+      const res = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages');
       if (res.ok) {
         const data = await res.json();
         // Only show messages where sender or receiver is the current patient
@@ -77,7 +77,7 @@ const DoctorConnect = () => {
     scrollToBottom();
 
     try {
-      await fetch('http://localhost:5000/api/doctor/messages', {
+      await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newMessage)

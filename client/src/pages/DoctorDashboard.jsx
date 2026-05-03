@@ -16,11 +16,11 @@ const DoctorDashboard = () => {
         const headers = { 'x-auth-token': user.token };
         
         // Fetch Patients
-        const patRes = await fetch('http://localhost:5000/api/doctor/patients', { headers });
+        const patRes = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/patients', { headers });
         const patData = patRes.ok ? await patRes.json() : [];
         
         // Fetch Alerts
-        const alertRes = await fetch('http://localhost:5000/api/doctor/alerts', { headers });
+        const alertRes = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/alerts', { headers });
         const alertData = alertRes.ok ? await alertRes.json() : [];
 
         setPatients(patData);

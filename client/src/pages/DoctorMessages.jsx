@@ -14,11 +14,11 @@ const DoctorMessages = () => {
     try {
       const headers = { 'x-auth-token': user.token };
       
-      const patRes = await fetch('http://localhost:5000/api/doctor/patients', { headers });
+      const patRes = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/patients', { headers });
       const patData = patRes.ok ? await patRes.json() : [];
       setPatients(patData);
 
-      const msgRes = await fetch('http://localhost:5000/api/doctor/messages', { headers });
+      const msgRes = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages', { headers });
       const msgData = msgRes.ok ? await msgRes.json() : [];
       setMessages(msgData);
 
@@ -30,7 +30,7 @@ const DoctorMessages = () => {
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => {
-      fetch('http://localhost:5000/api/doctor/messages', {
+      fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages', {
         headers: { 'x-auth-token': user.token }
       }).then(res => res.json()).then(data => setMessages(data));
     }, 5000);
@@ -60,7 +60,7 @@ const DoctorMessages = () => {
     scrollToBottom();
 
     try {
-      await fetch('http://localhost:5000/api/doctor/messages', {
+      await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ const DoctorMessages = () => {
         body: JSON.stringify(newMessage)
       });
       // Fetch fresh messages
-      const msgRes = await fetch('http://localhost:5000/api/doctor/messages', { headers: { 'x-auth-token': user.token } });
+      const msgRes = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages', { headers: { 'x-auth-token': user.token } });
       if (msgRes.ok) {
         setMessages(await msgRes.json());
       }

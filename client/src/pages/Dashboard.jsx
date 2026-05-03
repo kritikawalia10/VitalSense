@@ -103,7 +103,7 @@ const Dashboard = () => {
     const fetchVitals = async () => {
       if (user && user.patientId) {
         try {
-          const res = await fetch(`http://localhost:5000/api/vitals/${user.patientId}`, {
+          const res = await fetch(`https://vitalsense-jvbd.onrender.com/api/vitals/${user.patientId}`, {
             headers: { 'x-auth-token': user.token }
           });
           if (res.ok) {
@@ -152,7 +152,7 @@ const Dashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/patient/reports', {
+      const res = await fetch('https://vitalsense-jvbd.onrender.com/api/patient/reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

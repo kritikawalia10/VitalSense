@@ -35,7 +35,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const endpoint = 'http://localhost:5000/api/auth/register';
+      const endpoint = 'https://vitalsense-jvbd.onrender.com/api/auth/register';
       const payload = { ...formData, role: activeTab };
 
       const response = await fetch(endpoint, {

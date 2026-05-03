@@ -26,7 +26,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const endpoint = 'http://localhost:5000/api/auth/login';
+      const endpoint = 'https://vitalsense-jvbd.onrender.com/api/auth/login';
       const payload = activeTab === 'patient' 
         ? { name: formData.name, patientId: formData.patientId }
         : { email: formData.email, password: formData.password };
