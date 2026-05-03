@@ -1,7 +1,8 @@
 // AI Service to communicate with Python FastAPI module
 const predictHealthRisk = async (vitals) => {
   try {
-    const response = await fetch('http://localhost:8000/predict', {
+    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const response = await fetch(`${aiServiceUrl}/predict`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
