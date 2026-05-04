@@ -17,19 +17,19 @@ const Analytics = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-slate-100 tracking-tight">Analytics & Trends</h2>
-          <p className="text-slate-400 mt-1">Detailed historical health data.</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Analytics & Trends</h2>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Detailed historical health data.</p>
         </div>
-        <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2">
-          <Calendar size={16} className="text-slate-400" />
-          <span className="text-sm font-medium text-slate-200">This Week</span>
+        <div className="flex items-center gap-2 glass-panel border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2">
+          <Calendar size={16} className="text-slate-600 dark:text-slate-400" />
+          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">This Week</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-slate-100 mb-6">Weekly BP Spike Occurrences</h3>
-          <div className="h-[300px] w-full">
+        <div className="glass-panel backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-3xl p-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">Weekly BP Spike Occurrences</h3>
+          <div className="h-[200px] md:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
@@ -42,9 +42,9 @@ const Analytics = () => {
           </div>
         </div>
 
-        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-slate-100 mb-6">Average Heart Rate Trends</h3>
-          <div className="h-[300px] w-full">
+        <div className="glass-panel backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-3xl p-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">Average Heart Rate Trends</h3>
+          <div className="h-[200px] md:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />

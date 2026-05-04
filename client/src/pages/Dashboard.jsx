@@ -183,17 +183,17 @@ const Dashboard = () => {
             <p className="text-slate-500 dark:text-slate-400 font-medium text-sm tracking-wide">Real-time monitoring and predictive insights.</p>
           </div>
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
-          <label className="flex-1 md:flex-none cursor-pointer px-6 py-3 glass-pill hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-bold text-slate-800 dark:text-white transition-all flex items-center justify-center gap-2 group">
-            <FileText size={18} className="group-hover:text-[#4D6BFF] transition-colors" />
+        <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
+          <label className="flex-1 md:flex-none cursor-pointer px-3 py-2 md:px-6 md:py-3 glass-pill hover:bg-slate-50 dark:hover:bg-white/5 text-[11px] md:text-sm font-bold text-slate-800 dark:text-white transition-all flex items-center justify-center gap-1.5 md:gap-2 group whitespace-nowrap">
+            <FileText size={16} className="group-hover:text-[#4D6BFF] transition-colors md:w-[18px] md:h-[18px]" />
             Upload Report
             <input type="file" className="hidden" onChange={handleFileUpload} accept=".pdf,.doc,.docx,.jpg,.png" />
           </label>
           <button 
             onClick={() => setIsAdmissionOpen(true)}
-            className="flex-1 md:flex-none btn-primary flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none btn-primary flex items-center justify-center gap-1.5 md:gap-2 whitespace-nowrap"
           >
-            <Plus size={18} />
+            <Plus size={16} className="md:w-[18px] md:h-[18px]" />
             Admit Patient
           </button>
         </div>
@@ -215,16 +215,16 @@ const Dashboard = () => {
                 <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">Patient's blood pressure spiked to <span className="text-slate-900 dark:text-white font-bold">145/92 mmHg</span> at 14:00. Immediate attention recommended.</p>
               </div>
             </div>
-            <div className="flex gap-4 w-full md:w-auto">
+            <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
               <button 
                 onClick={() => setShowAlert(false)}
-                className="flex-1 md:flex-none px-6 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors whitespace-nowrap"
               >
                 Dismiss
               </button>
               <button 
                 onClick={() => setIsProtocolModalOpen(true)}
-                className="flex-1 md:flex-none btn-primary px-8"
+                className="flex-1 md:flex-none btn-primary whitespace-nowrap"
               >
                 Review Protocol
               </button>
@@ -297,9 +297,9 @@ const Dashboard = () => {
               </select>
             </div>
           </div>
-          <div className="h-[350px] w-full">
+          <div className="h-[250px] md:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={trendData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorSys" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#4D6BFF" stopOpacity={0.4}/>
@@ -311,11 +311,11 @@ const Dashboard = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-slate-200 dark:text-slate-700" vertical={false} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-slate-400 dark:text-slate-500" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} dy={10} />
-                <YAxis stroke="currentColor" className="text-slate-400 dark:text-slate-500" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-slate-400 dark:text-slate-500" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600 }} dy={10} />
+                <YAxis stroke="currentColor" className="text-slate-400 dark:text-slate-500" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600 }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="bpSys" name="Systolic BP" stroke="#4D6BFF" strokeWidth={4} fillOpacity={1} fill="url(#colorSys)" dot={{ r: 4, fill: '#4D6BFF', strokeWidth: 2, stroke: 'white' }} />
-                <Area type="monotone" dataKey="hr" name="Heart Rate" stroke="#8BA8FF" strokeWidth={4} fillOpacity={1} fill="url(#colorHr)" dot={{ r: 4, fill: '#8BA8FF', strokeWidth: 2, stroke: 'white' }} />
+                <Area type="monotone" dataKey="bpSys" name="Systolic BP" stroke="#4D6BFF" strokeWidth={3} fillOpacity={1} fill="url(#colorSys)" dot={{ r: 3, fill: '#4D6BFF', strokeWidth: 2, stroke: 'white' }} />
+                <Area type="monotone" dataKey="hr" name="Heart Rate" stroke="#8BA8FF" strokeWidth={3} fillOpacity={1} fill="url(#colorHr)" dot={{ r: 3, fill: '#8BA8FF', strokeWidth: 2, stroke: 'white' }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
