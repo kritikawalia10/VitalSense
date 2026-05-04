@@ -58,10 +58,8 @@ const NearbyHospitals = () => {
           );
           out center;
         `;
-        const response = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: query
-        });
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
         
         if (!response.ok) throw new Error('Failed to fetch hospital data');
         
