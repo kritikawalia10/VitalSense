@@ -86,10 +86,9 @@
            shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none;
   }
 
-  /* Rounded Pill Buttons - Black CTA in light, Glossy black/blue in dark */
   .btn-primary {
     @apply bg-slate-900 dark:bg-gradient-to-r dark:from-[#0F1425] dark:to-[#17203A]
-           text-white font-bold py-3 px-8 rounded-full 
+           text-white text-[11px] sm:text-xs md:text-base font-bold py-2 px-3 md:py-3 md:px-8 rounded-full 
            border border-transparent dark:border-[#4D6BFF]/30
            transition-all duration-300 
            hover:scale-[1.02] 
