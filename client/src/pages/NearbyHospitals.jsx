@@ -49,17 +49,7 @@ const NearbyHospitals = () => {
   useEffect(() => {
     const fetchHospitals = async (lat, lon) => {
       try {
-        const query = `
-          [out:json];
-          (
-            node["amenity"="hospital"](around:10000,${lat},${lon});
-            way["amenity"="hospital"](around:10000,${lat},${lon});
-            relation["amenity"="hospital"](around:10000,${lat},${lon});
-          );
-          out center;
-        `;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-        const response = await fetch(url);
+        const response = await fetch(`https://vitalsense-jvbd.onrender.com/api/maps/hospitals?lat=${lat}&lon=${lon}`);
         
         if (!response.ok) throw new Error('Failed to fetch hospital data');
         
