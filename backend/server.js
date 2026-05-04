@@ -36,6 +36,7 @@ app.use('/api/patient', require('./routes/patientDashboard'));
 // New VitalSense routes
 app.use('/api', require('./routes/health'));
 app.use('/api', require('./routes/admission'));
+app.use('/api/maps', require('./routes/maps'));
 
 const PORT = process.env.PORT || 5000;
 
