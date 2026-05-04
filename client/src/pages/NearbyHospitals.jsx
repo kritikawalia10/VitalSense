@@ -51,7 +51,10 @@ const NearbyHospitals = () => {
       try {
         const response = await fetch(`https://vitalsense-jvbd.onrender.com/api/maps/hospitals?lat=${lat}&lon=${lon}`);
         
-        if (!response.ok) throw new Error('Failed to fetch hospital data');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.msg || 'Failed to fetch hospital data');
+        }
         
         const data = await response.json();
         

@@ -23,12 +23,21 @@ router.get('/hospitals', async (req, res) => {
       out center;
     `;
 
-    const response = await axios.get(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+    // Using lz4 mirror which is often more reliable/faster for proxy requests
+    const response = await axios.get(`https://lz4.overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'VitalSense-Health-App/1.0'
+      }
+    });
     
     res.json(response.data);
   } catch (err) {
-    console.error('Maps Proxy Error:', err.message);
-    res.status(500).send('Server Error while fetching map data');
+    console.error('Maps Proxy Error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      msg: 'Server Error while fetching map data', 
+      error: err.response?.data || err.message 
+    });
   }
 });
 
