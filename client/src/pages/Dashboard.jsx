@@ -98,6 +98,14 @@ const Dashboard = () => {
     spo2: '--',
     temp: '36.8'
   });
+  const [activities, setActivities] = useState([]);
+  const [dynamicTrendData, setDynamicTrendData] = useState([]);
+  const [aiSummary, setAiSummary] = useState({
+    bpStatus: "Stable",
+    hrStatus: "Normal",
+    bpTrend: "maintaining baseline",
+    hrTrend: "stable"
+  });
 
   const BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 
@@ -136,15 +144,33 @@ const Dashboard = () => {
         
         if (simRes.ok) {
           const simData = await simRes.json();
-          // Map simulation data (bp, heartRate, oxygen)
-          // We use the simulation data to provide the "changing" effect
-          setVitals(prev => ({
-            bpSys: simData.bp || (latestData ? latestData.bpSys : '--'),
-            bpDia: Math.floor((simData.bp || 120) * 0.67) || (latestData ? latestData.bpDia : '--'),
-            hr: simData.heartRate || (latestData ? latestData.hr : '--'),
-            spo2: simData.oxygen || (latestData ? latestData.spo2 : '--'),
-            temp: (36.5 + Math.random() * 0.8).toFixed(1) // Simulate slight temp changes
-          }));
+          const newVitals = {
+            bpSys: simData.bp || (latestData ? latestData.bpSys : 120),
+            bpDia: Math.floor((simData.bp || 120) * 0.67) || (latestData ? latestData.bpDia : 80),
+            hr: simData.heartRate || (latestData ? latestData.hr : 70),
+            spo2: simData.oxygen || (latestData ? latestData.spo2 : 98),
+            temp: (36.5 + Math.random() * 0.8).toFixed(1)
+          };
+          setVitals(newVitals);
+
+          // Update trend data (keep last 10 points)
+          setDynamicTrendData(prev => {
+            const newData = [...prev, {
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              hr: newVitals.hr,
+              bpSys: newVitals.bpSys
+            }];
+            return newData.slice(-10);
+          });
+
+          // Update AI Summary logic
+          setAiSummary({
+            bpStatus: newVitals.bpSys > 140 ? "High" : newVitals.bpSys > 130 ? "Elevated" : "Normal",
+            hrStatus: newVitals.hr > 100 ? "Elevated" : "Normal",
+            bpTrend: newVitals.bpSys > 135 ? "trending higher than baseline" : "within normal range",
+            hrTrend: newVitals.hr > 90 ? "slightly elevated" : "optimal"
+          });
+
         } else if (latestData) {
           setVitals({
             ...latestData,
@@ -159,6 +185,30 @@ const Dashboard = () => {
     fetchVitals();
     const interval = setInterval(fetchVitals, 5000); // Poll every 5 seconds
     
+    return () => clearInterval(interval);
+  }, [user, BASE_URL]);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      if (!user) return;
+      try {
+        const res = await fetch(`${BASE_URL}/api/patient/my-alerts`, {
+          headers: { 'x-auth-token': user.token }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setActivities(data.slice(0, 5).map(alert => ({
+            time: new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: alert.message,
+            type: alert.severity === 'Critical' ? 'alert' : 'log'
+          })));
+        }
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+      }
+    };
+    fetchActivities();
+    const interval = setInterval(fetchActivities, 10000); // Update activities every 10s
     return () => clearInterval(interval);
   }, [user, BASE_URL]);
 
@@ -334,7 +384,7 @@ const Dashboard = () => {
           </div>
           <div className="h-[250px] md:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
+              <AreaChart data={dynamicTrendData.length > 0 ? dynamicTrendData : trendData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorSys" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#4D6BFF" stopOpacity={0.4}/>
@@ -367,11 +417,11 @@ const Dashboard = () => {
             <div className="space-y-6 relative z-10">
               <div className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-[#4D6BFF]/10">
                 <TrendingUp className="text-[#8BA8FF] mt-1 shrink-0" size={20} />
-                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">Blood pressure is trending <span className="text-[#4D6BFF] font-bold">12% higher</span> than your 7-day baseline.</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">Blood pressure is <span className="text-[#4D6BFF] font-bold">{aiSummary.bpStatus}</span> and {aiSummary.bpTrend}.</p>
               </div>
               <div className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-[#4D6BFF]/10">
                 <Activity className="text-blue-500 dark:text-blue-400 mt-1 shrink-0" size={20} />
-                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">Heart rate variability is stable. Rest quality was optimal.</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">Heart rate is {aiSummary.hrTrend}. Rest quality was optimal.</p>
               </div>
             </div>
           </div>
@@ -379,11 +429,10 @@ const Dashboard = () => {
           <div className="glass-panel rounded-[2.5rem] p-8">
             <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">Activity</h3>
             <div className="space-y-6">
-              {[
-                { time: '14:00', text: 'AI BP Alert', type: 'alert' },
-                { time: '11:30', text: 'Meds Taken', type: 'med' },
-                { time: '09:00', text: 'Morning Vitals', type: 'log' },
-              ].map((act, i) => (
+              {(activities.length > 0 ? activities : [
+                { time: '14:00', text: 'Monitoring Active', type: 'log' },
+                { time: '11:30', text: 'System Initialized', type: 'log' },
+              ]).map((act, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="text-xs text-slate-400 dark:text-slate-500 font-black w-12 shrink-0 pt-1 uppercase tracking-tighter">{act.time}</div>
                   <div className="relative pb-2">

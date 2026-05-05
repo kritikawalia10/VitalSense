@@ -13,10 +13,14 @@ let lastDbSave = Date.now();
 
 const startSimulation = () => {
   setInterval(async () => {
-    // Generate random data
-    currentVitals.bp = Math.floor(Math.random() * (150 - 110 + 1) + 110);
-    currentVitals.heartRate = Math.floor(Math.random() * (110 - 60 + 1) + 60);
-    currentVitals.oxygen = Math.floor(Math.random() * (100 - 90 + 1) + 90);
+    // Random Walk: Fluctuate by small increments rather than jumping to random values
+    const bpDelta = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    const hrDelta = Math.floor(Math.random() * 3) - 1; // -1 to +1
+    const oxDelta = Math.floor(Math.random() * 3) - 1; // -1 to +1
+
+    currentVitals.bp = Math.max(100, Math.min(160, currentVitals.bp + bpDelta));
+    currentVitals.heartRate = Math.max(50, Math.min(120, currentVitals.heartRate + hrDelta));
+    currentVitals.oxygen = Math.max(88, Math.min(100, currentVitals.oxygen + oxDelta));
     currentVitals.timestamp = new Date();
 
     // Call the AI Module for a prediction
