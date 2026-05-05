@@ -69,6 +69,7 @@ const DoctorConnect = () => {
   useEffect(() => {
     if (assignedDoctor) {
       fetchMessages();
+      markAsRead(assignedDoctor._id);
     }
     // Polling for new messages
     const interval = setInterval(() => {
@@ -78,6 +79,29 @@ const DoctorConnect = () => {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, assignedDoctor?._id]);
+
+  const markAsRead = async (doctorId) => {
+    try {
+      await fetch(`https://vitalsense-jvbd.onrender.com/api/doctor/messages/read/${doctorId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': user?.token
+        }
+      });
+      // No need to refresh everything, just a quick update
+    } catch (err) {
+      console.error('Error marking as read:', err);
+    }
+  };
+
+  const getUnreadCount = (doctorId) => {
+    if (!doctorId) return 0;
+    const docIdStr = doctorId.toString();
+    return messages.filter(m => 
+      m.senderId.toString() === docIdStr && m.receiverId.toString() === user?.id?.toString() && !m.read
+    ).length;
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -166,10 +190,15 @@ const DoctorConnect = () => {
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] flex items-center justify-center shadow-md shrink-0">
                   <User size={20} className="text-white" />
                 </div>
-                <div className="text-left overflow-hidden">
+                <div className="text-left flex-1 overflow-hidden">
                   <h4 className="font-bold text-slate-900 dark:text-white truncate">{doc.name}</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Specialist</p>
                 </div>
+                {getUnreadCount(doc._id) > 0 && (
+                  <div className="bg-[#4D6BFF] text-white text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-lg">
+                    {getUnreadCount(doc._id)}
+                  </div>
+                )}
               </button>
             ))}
           </div>
@@ -205,14 +234,14 @@ const DoctorConnect = () => {
                     const isMine = msg.senderId === user?.id;
                     
                     return (
-                      <div key={msg._id || index} className={`flex items-start gap-3 max-w-[90%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
-                        <div className={`p-3 rounded-2xl text-[11px] shadow-sm ${
+                      <div key={msg._id || index} className={`flex items-start gap-2 max-w-[90%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
+                        <div className={`py-1.5 px-3 rounded-2xl text-[10.5px] shadow-sm ${
                           isMine 
                             ? 'bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] text-white rounded-tr-none' 
                             : 'bg-white dark:bg-white/10 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-slate-200 rounded-tl-none'
                         }`}>
-                          <p className="leading-relaxed font-medium">{msg.content}</p>
-                          <span className={`text-[8px] mt-1.5 block font-bold uppercase tracking-tighter ${isMine ? 'text-white/70' : 'text-slate-400'}`}>
+                          <p className="leading-tight font-medium">{msg.content}</p>
+                          <span className={`text-[7.5px] mt-1 block font-bold uppercase tracking-tighter ${isMine ? 'text-white/70' : 'text-slate-400'}`}>
                             {formatTime(msg.timestamp || new Date())}
                           </span>
                         </div>

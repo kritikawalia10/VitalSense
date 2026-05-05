@@ -50,4 +50,19 @@ router.post('/messages', async (req, res) => {
   }
 });
 
+// @route   PUT /api/doctor/messages/read/:senderId
+// @desc    Mark messages as read
+router.put('/messages/read/:senderId', auth, async (req, res) => {
+  try {
+    await Message.updateMany(
+      { senderId: req.params.senderId, receiverId: req.user.id, read: false },
+      { $set: { read: true } }
+    );
+    res.json({ message: 'Messages marked as read' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
 module.exports = router;

@@ -57,6 +57,25 @@ const DoctorMessages = () => {
     scrollToBottom();
   }, [messages, activePatient]);
 
+  const markAsRead = async (patientId) => {
+    try {
+      await fetch(`https://vitalsense-jvbd.onrender.com/api/doctor/messages/read/${patientId}`, {
+        method: 'PUT',
+        headers: { 'x-auth-token': user.token }
+      });
+      // Refresh messages after marking as read
+      fetchData();
+    } catch (err) {
+      console.error('Error marking as read:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activePatient) {
+      markAsRead(activePatient.userId._id);
+    }
+  }, [activePatient]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -105,13 +124,12 @@ const DoctorMessages = () => {
     (m.receiverId === user.id && m.senderId === activePatient.userId._id)
   ) : [];
 
-  const hasUnread = (patientUserId) => {
-    const conversation = messages.filter(m => 
-      m.senderId === patientUserId || m.receiverId === patientUserId
-    );
-    if (conversation.length === 0) return false;
-    const lastMsg = conversation[conversation.length - 1];
-    return lastMsg.senderId === patientUserId && activePatient?.userId?._id !== patientUserId;
+  const getUnreadCount = (patientUserId) => {
+    if (!patientUserId) return 0;
+    const patientIdStr = patientUserId.toString();
+    return messages.filter(m => 
+      m.senderId.toString() === patientIdStr && m.receiverId.toString() === user.id.toString() && !m.read
+    ).length;
   };
 
   return (
@@ -142,19 +160,21 @@ const DoctorMessages = () => {
               <button
                 key={patient._id}
                 onClick={() => setActivePatient(patient)}
-                className={`w-full text-left p-4 border-b border-slate-200 dark:border-slate-800/50 transition-colors flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800/30 ${
+                className={`w-full text-left p-3 border-b border-slate-200 dark:border-slate-800/50 transition-colors flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800/30 ${
                   activePatient?._id === patient._id ? 'bg-slate-200 dark:bg-slate-800/50 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'
                 }`}
               >
-                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
-                  <User size={18} className="text-primary" />
+                <div className="w-9 h-9 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
+                  <User size={16} className="text-primary" />
                 </div>
                 <div className="overflow-hidden flex-1">
                   <h4 className="text-slate-800 dark:text-slate-200 font-semibold text-sm truncate">{patient.name}</h4>
                   <p className="text-slate-500 dark:text-slate-500 light:text-slate-500 text-xs mt-0.5">{patient.patientId}</p>
                 </div>
-                {hasUnread(patient.userId._id) && (
-                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"></div>
+                {getUnreadCount(patient.userId._id) > 0 && (
+                  <div className="bg-primary text-white text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(77,107,255,0.4)]">
+                    {getUnreadCount(patient.userId._id)}
+                  </div>
                 )}
               </button>
             ))}
@@ -185,16 +205,16 @@ const DoctorMessages = () => {
                     
                     return (
                       <div key={msg._id || index} className={`flex items-start gap-3 max-w-[80%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isMine ? 'bg-primary' : 'bg-slate-700 dark:bg-slate-700 light:bg-slate-200'}`}>
-                          <User size={16} className={isMine ? 'text-white' : 'text-slate-300 dark:text-slate-300 light:text-slate-600'} />
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isMine ? 'bg-primary' : 'bg-slate-700 dark:bg-slate-700 light:bg-slate-200'}`}>
+                          <User size={14} className={isMine ? 'text-white' : 'text-slate-300 dark:text-slate-300 light:text-slate-600'} />
                         </div>
-                        <div className={`p-4 rounded-2xl text-sm ${
+                        <div className={`py-1.5 px-3 rounded-2xl text-[10.5px] ${
                           isMine 
                             ? 'bg-primary border border-primary/50 rounded-tr-sm text-white' 
                             : 'bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-700 dark:border-slate-700 light:border-slate-200 rounded-tl-sm text-slate-700 dark:text-slate-300'
                         }`}>
-                          <p>{msg.content}</p>
-                          <span className={`text-[10px] mt-2 block ${isMine ? 'text-blue-200' : 'text-slate-500 dark:text-slate-500 light:text-slate-400'}`}>
+                          <p className="leading-tight">{msg.content}</p>
+                          <span className={`text-[7.5px] mt-1 block font-bold ${isMine ? 'text-blue-200' : 'text-slate-500 dark:text-slate-500 light:text-slate-400'}`}>
                             {formatTime(msg.timestamp || new Date())}
                           </span>
                         </div>
