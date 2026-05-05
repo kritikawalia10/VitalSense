@@ -69,9 +69,6 @@ const DoctorMessages = () => {
       });
       if (res.ok) {
         // Only update local state if necessary to avoid infinite loops
-        const updatedMessages = messages.map(m => 
-          (m.senderId === patientId && m.receiverId === user.id) ? { ...m, read: true } : m
-        );
         // We don't setMessages here to avoid conflict with the interval, 
         // but the next interval will catch the 'read: true' status from the server.
       }
