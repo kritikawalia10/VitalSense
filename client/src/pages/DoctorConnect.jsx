@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Send, Phone, Video, MoreVertical, Paperclip, User, Search, MessageCircle } from 'lucide-react';
+import { Send, Phone, Video, Paperclip, User, Search, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const DoctorConnect = () => {
