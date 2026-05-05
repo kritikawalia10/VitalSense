@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Send, Phone, Video, MoreVertical, Paperclip, User } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Send, Phone, Video, MoreVertical, Paperclip, User, Search, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const DoctorConnect = () => {
+  const [searchParams] = useSearchParams();
+  const doctorIdFromUrl = searchParams.get('id');
+  
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [assignedDoctor, setAssignedDoctor] = useState(null);
+  const [doctorList, setDoctorList] = useState([]);
   const { user } = useContext(AuthContext);
   const messagesEndRef = useRef(null);
   const prevMessagesCountRef = useRef(0);
@@ -22,13 +27,18 @@ const DoctorConnect = () => {
   }, [messages, user?.id]);
 
   useEffect(() => {
-    // Fetch assigned doctor (using first available doctor for prototype)
-    const fetchDoctor = async () => {
+    const fetchDoctors = async () => {
       try {
         const res = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/list');
         if (res.ok) {
           const doctors = await res.json();
-          if (doctors.length > 0) {
+          setDoctorList(doctors);
+          
+          if (doctorIdFromUrl) {
+            const selected = doctors.find(d => d._id === doctorIdFromUrl);
+            if (selected) setAssignedDoctor(selected);
+            else if (doctors.length > 0) setAssignedDoctor(doctors[0]);
+          } else if (doctors.length > 0 && !assignedDoctor) {
             setAssignedDoctor(doctors[0]);
           }
         }
@@ -36,16 +46,19 @@ const DoctorConnect = () => {
         console.error('Error fetching doctors:', err);
       }
     };
-    fetchDoctor();
-  }, []);
+    fetchDoctors();
+  }, [doctorIdFromUrl]);
 
   const fetchMessages = async () => {
     try {
       const res = await fetch('https://vitalsense-jvbd.onrender.com/api/doctor/messages');
       if (res.ok) {
         const data = await res.json();
-        // Only show messages where sender or receiver is the current patient
-        const filteredMessages = data.filter(m => m.senderId === user?.id || m.receiverId === user?.id);
+        // Only show messages where sender or receiver is the current patient AND the other party is the assigned doctor
+        const filteredMessages = data.filter(m => 
+          (m.senderId === user?.id && m.receiverId === assignedDoctor?._id) || 
+          (m.receiverId === user?.id && m.senderId === assignedDoctor?._id)
+        );
         setMessages(filteredMessages);
       }
     } catch (err) {
@@ -109,78 +122,118 @@ const DoctorConnect = () => {
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex justify-between items-end mb-6 shrink-0">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Doctor Connect</h2>
-          <p className="text-slate-500 dark:text-slate-400">Direct communication with your primary care physician.</p>
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Doctor Connect</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Direct communication with your healthcare professionals.</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/50 rounded-3xl overflow-hidden flex flex-col">
-        {/* Chat Header */}
-        <div className="h-16 border-b border-slate-800/50 dark:border-slate-800/50 light:border-slate-200 flex items-center justify-between px-6 bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center border border-primary/50">
-              <User size={20} className="text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-200 dark:text-slate-200 light:text-slate-800">{assignedDoctor ? assignedDoctor.name : 'Your Doctor'}</h3>
-              <p className="text-xs text-green-400 font-medium">{assignedDoctor ? 'Online' : 'Connecting...'}</p>
+      <div className="flex-1 glass-panel rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row">
+        
+        {/* Sidebar - Doctor List */}
+        <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 dark:border-white/5 flex flex-col bg-slate-50/50 dark:bg-white/2">
+          <div className="p-4 border-b border-slate-200 dark:border-white/5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search doctors..." 
+                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#4D6BFF]/50 transition-all"
+              />
             </div>
           </div>
-          <div className="flex items-center gap-4 text-slate-400 dark:text-slate-400 light:text-slate-500">
-            <button className="hover:text-primary transition-colors"><Phone size={20} /></button>
-            <button className="hover:text-primary transition-colors"><Video size={20} /></button>
-            <button className="hover:text-slate-200 dark:hover:text-slate-200 light:hover:text-slate-800 transition-colors"><MoreVertical size={20} /></button>
-          </div>
-        </div>
-
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.length === 0 ? (
-            <div className="text-center text-slate-500 mt-10">Say hello to your doctor!</div>
-          ) : (
-            messages.map((msg, index) => {
-              const isMine = msg.senderId === user?.id;
-              
-              return (
-                <div key={msg._id || index} className={`flex items-start gap-3 max-w-[80%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isMine ? 'bg-slate-700 dark:bg-slate-700 light:bg-slate-200' : 'bg-primary'}`}>
-                    <User size={16} className={isMine ? 'text-slate-300 dark:text-slate-300 light:text-slate-600' : 'text-white'} />
-                  </div>
-                  <div className={`p-4 rounded-2xl text-sm ${
-                    isMine 
-                      ? 'bg-primary border border-primary/50 rounded-tr-sm text-white' 
-                      : 'bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-700 dark:border-slate-700 light:border-slate-200 rounded-tl-sm text-slate-300 dark:text-slate-300 light:text-slate-700'
-                  }`}>
-                    <p>{msg.content}</p>
-                    <span className={`text-[10px] mt-2 block ${isMine ? 'text-blue-200' : 'text-slate-500 dark:text-slate-500 light:text-slate-400'}`}>
-                      {formatTime(msg.timestamp || new Date())}
-                    </span>
-                  </div>
+          <div className="flex-1 overflow-y-auto">
+            {doctorList.map(doc => (
+              <button
+                key={doc._id}
+                onClick={() => setAssignedDoctor(doc)}
+                className={`w-full p-4 flex items-center gap-3 transition-all ${
+                  assignedDoctor?._id === doc._id 
+                    ? 'bg-[#4D6BFF]/10 border-r-4 border-[#4D6BFF]' 
+                    : 'hover:bg-slate-100 dark:hover:bg-white/5 border-r-4 border-transparent'
+                }`}
+              >
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] flex items-center justify-center shadow-md shrink-0">
+                  <User size={20} className="text-white" />
                 </div>
-              );
-            })
-          )}
-          <div ref={messagesEndRef} />
+                <div className="text-left overflow-hidden">
+                  <h4 className="font-bold text-slate-900 dark:text-white truncate">{doc.name}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Specialist</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="p-4 bg-slate-900/60 dark:bg-slate-900/60 light:bg-slate-50 border-t border-slate-800/50 dark:border-slate-800/50 light:border-slate-200 shrink-0">
-          <div className="relative flex items-center">
-            <button type="button" className="absolute left-3 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-slate-200 dark:hover:text-slate-200 light:hover:text-slate-700 transition-colors">
-              <Paperclip size={20} />
-            </button>
-            <input 
-              type="text" 
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message..." 
-              className="w-full bg-slate-800/80 dark:bg-slate-800/80 light:bg-white border border-slate-700/50 dark:border-slate-700/50 light:border-slate-300 rounded-full py-3 pl-12 pr-14 text-sm text-slate-200 dark:text-slate-200 light:text-slate-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-            />
-            <button type="submit" disabled={!message.trim() || !assignedDoctor} className="absolute right-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white p-2 rounded-full transition-colors">
-              <Send size={16} />
-            </button>
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Chat Header */}
+          <div className="h-16 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-6 bg-white dark:bg-white/2">
+            <div className="flex items-center gap-3">
+              <div>
+                <h3 className="font-black text-slate-900 dark:text-white">{assignedDoctor ? assignedDoctor.name : 'Select a Doctor'}</h3>
+                <p className="text-[10px] text-green-500 font-black uppercase tracking-widest">{assignedDoctor ? 'Online' : '...'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-slate-400">
+              <button className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all"><Phone size={20} /></button>
+              <button className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all"><Video size={20} /></button>
+            </div>
           </div>
-        </form>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50">
+                <MessageCircle size={48} className="mb-4" />
+                <p className="font-bold">Say hello to {assignedDoctor?.name || 'your doctor'}!</p>
+              </div>
+            ) : (
+              messages.map((msg, index) => {
+                const isMine = msg.senderId === user?.id;
+                
+                return (
+                  <div key={msg._id || index} className={`flex items-start gap-3 max-w-[85%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
+                    <div className={`p-4 rounded-2xl text-sm shadow-sm ${
+                      isMine 
+                        ? 'bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] text-white rounded-tr-none' 
+                        : 'bg-white dark:bg-white/10 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-slate-200 rounded-tl-none'
+                    }`}>
+                      <p className="leading-relaxed font-medium">{msg.content}</p>
+                      <span className={`text-[9px] mt-2 block font-bold uppercase tracking-tighter ${isMine ? 'text-white/70' : 'text-slate-400'}`}>
+                        {formatTime(msg.timestamp || new Date())}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Message Input */}
+          <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-white/2 border-t border-slate-200 dark:border-white/5 shrink-0">
+            <div className="relative flex items-center">
+              <button type="button" className="absolute left-4 text-slate-400 hover:text-[#4D6BFF] transition-colors">
+                <Paperclip size={20} />
+              </button>
+              <input 
+                type="text" 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={assignedDoctor ? `Message ${assignedDoctor.name}...` : "Select a doctor to start chatting"} 
+                disabled={!assignedDoctor}
+                className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-[#4D6BFF]/30 rounded-2xl py-4 pl-12 pr-16 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#4D6BFF]/10 transition-all"
+              />
+              <button 
+                type="submit" 
+                disabled={!message.trim() || !assignedDoctor} 
+                className="absolute right-2 bg-[#4D6BFF] hover:bg-[#8BA8FF] disabled:opacity-50 text-white p-3 rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-
-import { Activity, Heart, Thermometer, Droplets, AlertTriangle, TrendingUp, Clock, FileText, Plus, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Activity, Heart, Thermometer, Droplets, AlertTriangle, TrendingUp, Clock, FileText, Plus, X, MessageCircle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdmissionForm from '../components/AdmissionForm';
 import { AuthContext } from '../context/AuthContext';
@@ -88,6 +88,7 @@ const VitalCard = ({ title, value, unit, icon, status, colorClass, borderClass, 
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(true);
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
@@ -110,6 +111,23 @@ const Dashboard = () => {
   const BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 
     : 'https://vitalsense-jvbd.onrender.com';
+
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/doctor/list`);
+        if (res.ok) {
+          const data = await res.json();
+          setDoctors(data);
+        }
+      } catch (err) {
+        console.error('Error fetching doctors:', err);
+      }
+    };
+    fetchDoctors();
+  }, [BASE_URL]);
 
   useEffect(() => {
     const fetchVitals = async () => {
@@ -452,6 +470,39 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Medical Team Section */}
+      <div className="glass-panel rounded-[2.5rem] p-8 mt-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white">Medical Team</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Available healthcare professionals</p>
+          </div>
+          <button onClick={() => navigate('/doctor-connect')} className="text-[#4D6BFF] font-bold text-sm hover:underline">View All</button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {doctors.length > 0 ? doctors.slice(0, 4).map((doc) => (
+            <div key={doc._id} className="relative group p-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-[#4D6BFF]/30 transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] flex items-center justify-center mb-4 shadow-lg">
+                  <User size={32} className="text-white" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">{doc.name}</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Primary Physician</p>
+                <button 
+                  onClick={() => navigate(`/doctor-connect?id=${doc._id}`)}
+                  className="w-full py-2.5 px-4 glass-pill text-[11px] font-black uppercase tracking-widest text-[#4D6BFF] hover:bg-[#4D6BFF] hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={14} />
+                  Message
+                </button>
+              </div>
+            </div>
+          )) : (
+            <div className="col-span-full text-center py-10 text-slate-500">Loading doctors...</div>
+          )}
         </div>
       </div>
     </div>
