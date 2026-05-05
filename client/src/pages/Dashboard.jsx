@@ -96,36 +96,71 @@ const Dashboard = () => {
     bpDia: '--',
     hr: '--',
     spo2: '--',
-    temp: '36.8' // Vitals model doesn't store temp, so keeping this default or from another source
+    temp: '36.8'
   });
+
+  const BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000' 
+    : 'https://vitalsense-jvbd.onrender.com';
 
   useEffect(() => {
     const fetchVitals = async () => {
-      if (user && user.patientId) {
-        try {
-          const res = await fetch(`https://vitalsense-jvbd.onrender.com/api/vitals/${user.patientId}`, {
+      if (!user) return;
+
+      try {
+        // 1. Try to fetch specific patient vitals first
+        let latestData = null;
+        
+        if (user.patientId) {
+          const res = await fetch(`${BASE_URL}/api/vitals/${user.patientId}`, {
             headers: { 'x-auth-token': user.token }
           });
           if (res.ok) {
             const data = await res.json();
             if (data.length > 0) {
-              const latest = data[0];
-              setVitals({
-                bpSys: latest.systolicBP || '--',
-                bpDia: latest.diastolicBP || '--',
-                hr: latest.heartRate || '--',
-                spo2: latest.spo2 || '--',
-                temp: '36.8'
-              });
+              latestData = {
+                bpSys: data[0].systolicBP,
+                bpDia: data[0].diastolicBP,
+                hr: data[0].heartRate,
+                spo2: data[0].spo2
+              };
             }
           }
-        } catch (err) {
-          console.error('Error fetching vitals:', err);
         }
+
+        // 2. Fallback to live simulation data if no patient vitals or to make it "live"
+        // We always fetch simulation data to ensure the values are "changing" as requested
+        const simRes = await fetch(`${BASE_URL}/api/health`, {
+          headers: { 'x-auth-token': user.token }
+        });
+        
+        if (simRes.ok) {
+          const simData = await simRes.json();
+          // Map simulation data (bp, heartRate, oxygen)
+          // We use the simulation data to provide the "changing" effect
+          setVitals(prev => ({
+            bpSys: simData.bp || (latestData ? latestData.bpSys : '--'),
+            bpDia: Math.floor((simData.bp || 120) * 0.67) || (latestData ? latestData.bpDia : '--'),
+            hr: simData.heartRate || (latestData ? latestData.hr : '--'),
+            spo2: simData.oxygen || (latestData ? latestData.spo2 : '--'),
+            temp: (36.5 + Math.random() * 0.8).toFixed(1) // Simulate slight temp changes
+          }));
+        } else if (latestData) {
+          setVitals({
+            ...latestData,
+            temp: (36.5 + Math.random() * 0.8).toFixed(1)
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching vitals:', err);
       }
     };
+
     fetchVitals();
-  }, [user]);
+    const interval = setInterval(fetchVitals, 5000); // Poll every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [user, BASE_URL]);
 
   // Custom Tooltip for the chart
   const CustomTooltip = ({ active, payload, label }) => {
@@ -152,7 +187,7 @@ const Dashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://vitalsense-jvbd.onrender.com/api/patient/reports', {
+      const res = await fetch(`${BASE_URL}/api/patient/reports`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
