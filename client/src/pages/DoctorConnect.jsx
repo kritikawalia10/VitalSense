@@ -67,12 +67,17 @@ const DoctorConnect = () => {
   };
 
   useEffect(() => {
-    fetchMessages();
-    // Simple polling for new messages every 5 seconds
-    const interval = setInterval(fetchMessages, 5000);
+    if (assignedDoctor) {
+      fetchMessages();
+    }
+    // Polling for new messages
+    const interval = setInterval(() => {
+      if (assignedDoctor) fetchMessages();
+    }, 5000);
+    
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, assignedDoctor?._id]);
 
   useEffect(() => {
     scrollToBottom();
