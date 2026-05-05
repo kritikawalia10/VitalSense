@@ -78,7 +78,7 @@ const DoctorConnect = () => {
     
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, assignedDoctor?._id]);
+  }, [user, assignedDoctor?._id, messages.length]);
 
   const markAsRead = async (doctorId) => {
     try {

@@ -58,13 +58,23 @@ const DoctorMessages = () => {
   }, [messages, activePatient]);
 
   const markAsRead = async (patientId) => {
+    if (!patientId) return;
     try {
-      await fetch(`https://vitalsense-jvbd.onrender.com/api/doctor/messages/read/${patientId}`, {
+      const res = await fetch(`https://vitalsense-jvbd.onrender.com/api/doctor/messages/read/${patientId}`, {
         method: 'PUT',
-        headers: { 'x-auth-token': user.token }
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': user.token 
+        }
       });
-      // Refresh messages after marking as read
-      fetchData();
+      if (res.ok) {
+        // Only update local state if necessary to avoid infinite loops
+        const updatedMessages = messages.map(m => 
+          (m.senderId === patientId && m.receiverId === user.id) ? { ...m, read: true } : m
+        );
+        // We don't setMessages here to avoid conflict with the interval, 
+        // but the next interval will catch the 'read: true' status from the server.
+      }
     } catch (err) {
       console.error('Error marking as read:', err);
     }
@@ -74,7 +84,8 @@ const DoctorMessages = () => {
     if (activePatient) {
       markAsRead(activePatient.userId._id);
     }
-  }, [activePatient]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePatient, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
