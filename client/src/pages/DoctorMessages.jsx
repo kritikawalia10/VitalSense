@@ -9,6 +9,18 @@ const DoctorMessages = () => {
   const [activePatient, setActivePatient] = useState(null);
   const { user } = useContext(AuthContext);
   const messagesEndRef = useRef(null);
+  const prevMessagesCountRef = useRef(0);
+  const notificationSound = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3'));
+
+  useEffect(() => {
+    if (messages.length > prevMessagesCountRef.current) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.senderId !== user?.id) {
+        notificationSound.current.play().catch(e => console.log('Audio play blocked until user interaction'));
+      }
+    }
+    prevMessagesCountRef.current = messages.length;
+  }, [messages, user?.id]);
 
   const fetchData = async () => {
     try {

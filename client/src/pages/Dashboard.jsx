@@ -66,23 +66,23 @@ const ProtocolModal = ({ isOpen, onClose }) => {
 };
 
 const VitalCard = ({ title, value, unit, icon, status, colorClass, borderClass, bgClass, glowClass }) => (
-  <div className={`relative overflow-hidden rounded-[2.5rem] p-6 md:p-8 glass-panel transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] cursor-pointer group`}>
-    <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity ${glowClass}`}></div>
-    <div className="flex justify-between items-start mb-8">
-      <div className={`p-4 rounded-2xl ${bgClass} border border-black/5 dark:border-white/5 shadow-inner`}>
-        {icon}
+  <div className={`relative overflow-hidden rounded-[2rem] p-4 md:p-6 glass-panel transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.4)] cursor-pointer group`}>
+    <div className={`absolute -right-10 -top-10 w-24 h-24 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity ${glowClass}`}></div>
+    <div className="flex justify-between items-start mb-4">
+      <div className={`p-3 rounded-xl ${bgClass} border border-black/5 dark:border-white/5 shadow-inner`}>
+        {React.cloneElement(icon, { size: 20 })}
       </div>
-      <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${colorClass} shadow-sm`}>
+      <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${colorClass} shadow-sm`}>
         {status}
       </div>
     </div>
     <div className="relative z-10">
-      <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{title}</p>
-      <h3 className="text-4xl font-black text-slate-900 dark:text-white flex items-baseline gap-1 tracking-tight">
-        {value} <span className="text-base font-medium text-slate-400 dark:text-slate-500">{unit}</span>
+      <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{title}</p>
+      <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-baseline gap-1 tracking-tight">
+        {value} <span className="text-sm font-medium text-slate-400 dark:text-slate-500">{unit}</span>
       </h3>
     </div>
-    <div className={`absolute bottom-0 left-0 w-full h-1.5 bg-current opacity-20 ${colorClass.split(' ')[0]}`}></div>
+    <div className={`absolute bottom-0 left-0 w-full h-1 bg-current opacity-20 ${colorClass.split(' ')[0]}`}></div>
   </div>
 );
 
