@@ -15,12 +15,15 @@ const DoctorMessages = () => {
   useEffect(() => {
     if (messages.length > prevMessagesCountRef.current) {
       const lastMessage = messages[messages.length - 1];
+      // Only play sound if the message is from a patient and it's not the one we are currently chatting with
       if (lastMessage && lastMessage.senderId !== user?.id) {
-        notificationSound.current.play().catch(e => console.log('Audio play blocked until user interaction'));
+        if (!activePatient || lastMessage.senderId !== activePatient.userId._id) {
+          notificationSound.current.play().catch(e => console.log('Audio play blocked until user interaction'));
+        }
       }
     }
     prevMessagesCountRef.current = messages.length;
-  }, [messages, user?.id]);
+  }, [messages, user?.id, activePatient]);
 
   const fetchData = async () => {
     try {
@@ -102,6 +105,15 @@ const DoctorMessages = () => {
     (m.receiverId === user.id && m.senderId === activePatient.userId._id)
   ) : [];
 
+  const hasUnread = (patientUserId) => {
+    const conversation = messages.filter(m => 
+      m.senderId === patientUserId || m.receiverId === patientUserId
+    );
+    if (conversation.length === 0) return false;
+    const lastMsg = conversation[conversation.length - 1];
+    return lastMsg.senderId === patientUserId && activePatient?.userId?._id !== patientUserId;
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex justify-between items-end mb-6 shrink-0">
@@ -137,10 +149,13 @@ const DoctorMessages = () => {
                 <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
                   <User size={18} className="text-primary" />
                 </div>
-                <div className="overflow-hidden">
+                <div className="overflow-hidden flex-1">
                   <h4 className="text-slate-800 dark:text-slate-200 font-semibold text-sm truncate">{patient.name}</h4>
                   <p className="text-slate-500 dark:text-slate-500 light:text-slate-500 text-xs mt-0.5">{patient.patientId}</p>
                 </div>
+                {hasUnread(patient.userId._id) && (
+                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"></div>
+                )}
               </button>
             ))}
           </div>
