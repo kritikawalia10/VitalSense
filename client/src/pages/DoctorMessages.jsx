@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Send, User, Search } from 'lucide-react';
+import { Send, User, Search, MessageCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const DoctorMessages = () => {
@@ -141,10 +141,10 @@ const DoctorMessages = () => {
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/50">
+      <div className="flex-1 glass-panel rounded-[1.5rem] overflow-hidden flex flex-col md:flex-row shadow-2xl border-white/5">
         
         {/* Patient List Sidebar */}
-        <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800/50 flex flex-col bg-slate-50 dark:bg-slate-900/60">
+        <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-slate-200 dark:border-white/5 flex flex-col bg-slate-50/50 dark:bg-white/2">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800/50">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -182,41 +182,41 @@ const DoctorMessages = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col h-full min-h-[400px]">
+        <div className="flex-1 flex flex-col min-w-0 bg-white/20 dark:bg-black/5">
           {activePatient ? (
             <>
               {/* Chat Header */}
-              <div className="h-16 border-b border-slate-800/50 dark:border-slate-800/50 light:border-slate-200 flex items-center justify-between px-6 bg-slate-900/40 dark:bg-slate-900/40 light:bg-white shrink-0">
+              <div className="h-14 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-6 bg-white dark:bg-[#0F1223]/80 shrink-0">
                 <div className="flex items-center gap-3">
                   <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{activePatient.name}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-500 light:text-slate-500">Patient ID: {activePatient.patientId}</p>
+                    <h3 className="text-sm font-black text-slate-800 dark:text-white leading-tight">{activePatient.name}</h3>
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Patient ID: {activePatient.patientId}</p>
                   </div>
                 </div>
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {chatMessages.length === 0 ? (
-                  <div className="text-center text-slate-500 mt-10">No messages yet. Send a message to {activePatient.name}.</div>
+                  <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-40 p-10 text-center">
+                    <MessageCircle size={32} className="mb-3" />
+                    <p className="font-bold text-[11px] uppercase tracking-wider">No messages yet. Send a message to {activePatient.name}.</p>
+                  </div>
                 ) : (
                   chatMessages.map((msg, index) => {
                     const isMine = msg.senderId === user?.id;
                     
                     return (
-                      <div key={msg._id || index} className={`flex items-start gap-3 max-w-[80%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isMine ? 'bg-primary' : 'bg-slate-700 dark:bg-slate-700 light:bg-slate-200'}`}>
-                          <User size={14} className={isMine ? 'text-white' : 'text-slate-300 dark:text-slate-300 light:text-slate-600'} />
-                        </div>
-                        <div className={`py-1.5 px-3 rounded-2xl text-[10.5px] ${
+                      <div key={msg._id || index} className={`flex items-start gap-2 max-w-[90%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}>
+                        <div className={`py-1.5 px-3 rounded-2xl text-[10.5px] shadow-sm ${
                           isMine 
-                            ? 'bg-primary border border-primary/50 rounded-tr-sm text-white' 
-                            : 'bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-700 dark:border-slate-700 light:border-slate-200 rounded-tl-sm text-slate-700 dark:text-slate-300'
+                            ? 'bg-gradient-to-br from-[#4D6BFF] to-[#8BA8FF] text-white rounded-tr-none' 
+                            : 'bg-white dark:bg-white/10 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-slate-200 rounded-tl-none'
                         }`}>
-                          <p className="leading-tight">{msg.content}</p>
-                          <span className={`text-[7.5px] mt-1 block font-bold ${isMine ? 'text-blue-200' : 'text-slate-500 dark:text-slate-500 light:text-slate-400'}`}>
+                          <p className="leading-tight font-medium">{msg.content}</p>
+                          <div className={`text-[7.5px] mt-1 font-bold uppercase tracking-tighter text-right ${isMine ? 'text-white/70' : 'text-slate-400'}`}>
                             {formatTime(msg.timestamp || new Date())}
-                          </span>
+                          </div>
                         </div>
                       </div>
                     );
@@ -226,28 +226,26 @@ const DoctorMessages = () => {
               </div>
 
               {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-4 bg-slate-900/60 dark:bg-slate-900/60 light:bg-slate-50 border-t border-slate-800/50 dark:border-slate-800/50 light:border-slate-200 shrink-0">
+              <form onSubmit={handleSendMessage} className="p-3 bg-white dark:bg-[#0F1223]/80 border-t border-slate-200 dark:border-white/5 shrink-0">
                 <div className="relative flex items-center">
                   <input 
                     type="text" 
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..." 
-                    className="w-full bg-slate-800/80 dark:bg-slate-800/80 light:bg-white border border-slate-700/50 dark:border-slate-700/50 light:border-slate-300 rounded-full py-3 pl-6 pr-14 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                    placeholder={`Message ${activePatient.name}...`} 
+                    className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-[#4D6BFF]/30 rounded-xl py-3.5 pl-6 pr-14 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#4D6BFF]/10 transition-all"
                   />
-                  <button type="submit" disabled={!message.trim()} className="absolute right-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white p-2 rounded-full transition-colors">
+                  <button type="submit" disabled={!message.trim()} className="absolute right-2 bg-[#4D6BFF] hover:bg-[#8BA8FF] disabled:opacity-50 text-white p-2.5 rounded-lg shadow-lg transition-all active:scale-95">
                     <Send size={16} />
                   </button>
                 </div>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-slate-500 light:text-slate-400 p-6 text-center">
-              <div className="w-16 h-16 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-200 rounded-full flex items-center justify-center mb-4">
-                <User size={32} />
-              </div>
-              <h3 className="text-xl font-medium text-slate-300 dark:text-slate-300 light:text-slate-600 mb-2">Select a Patient</h3>
-              <p>Choose a patient from the sidebar to view their message history and send new messages.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 opacity-40 p-10 text-center">
+              <User size={48} className="mb-4" />
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white mb-2">Select a Patient</h3>
+              <p className="text-xs max-w-xs mx-auto">Choose a patient from the sidebar to view their message history and send new messages.</p>
             </div>
           )}
         </div>
