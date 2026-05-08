@@ -325,13 +325,13 @@ const Dashboard = () => {
               message: `Patient's blood pressure spiked to `,
               suggestion: 'Immediate attention recommended.',
               icon: <AlertTriangle size={28} />,
-              buttonClass: 'bg-white text-red-600 hover:bg-red-50 shadow-lg',
-              sectionClass: 'bg-gradient-to-br from-red-600 to-red-500 text-white border-red-400/30',
-              iconBg: 'bg-white/20 text-white',
-              titleColor: 'text-white',
-              textColor: 'text-red-50',
-              bpColor: 'text-white',
-              dismissColor: 'text-white/70 hover:text-white'
+              buttonClass: 'btn-primary bg-red-600 hover:bg-red-700 text-white shadow-none',
+              sectionClass: 'bg-red-500/10 dark:bg-red-500/20 text-slate-700 dark:text-slate-200 border-red-500/20',
+              iconBg: 'bg-red-500/20 text-red-600 dark:text-red-400',
+              titleColor: 'text-red-600 dark:text-red-400',
+              textColor: 'text-slate-600 dark:text-slate-300',
+              bpColor: 'text-red-700 dark:text-red-300',
+              dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }
           : sys > 120
             ? {
@@ -340,13 +340,13 @@ const Dashboard = () => {
                 message: `Patient's blood pressure is elevated at `,
                 suggestion: 'Continue monitoring and ensure rest.',
                 icon: <Activity size={28} className="animate-pulse" />,
-                buttonClass: 'bg-white text-amber-600 hover:bg-amber-50 shadow-lg',
-                sectionClass: 'bg-gradient-to-br from-amber-500 to-amber-400 text-white border-amber-300/30',
-                iconBg: 'bg-white/20 text-white',
-                titleColor: 'text-white',
-                textColor: 'text-amber-50',
-                bpColor: 'text-white',
-                dismissColor: 'text-white/70 hover:text-white'
+                buttonClass: 'btn-primary bg-amber-500 hover:bg-amber-600 text-white shadow-none',
+                sectionClass: 'bg-amber-500/10 dark:bg-amber-500/20 text-slate-700 dark:text-slate-200 border-amber-500/20',
+                iconBg: 'bg-amber-500/20 text-amber-600 dark:text-amber-400',
+                titleColor: 'text-amber-600 dark:text-amber-400',
+                textColor: 'text-slate-600 dark:text-slate-300',
+                bpColor: 'text-amber-700 dark:text-amber-300',
+                dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }
             : {
                 color: 'emerald',
