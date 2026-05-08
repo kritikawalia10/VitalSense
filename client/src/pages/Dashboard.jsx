@@ -102,6 +102,7 @@ const Dashboard = () => {
     temp: '36.8'
   });
   const [activities, setActivities] = useState([]);
+  const [localLogs, setLocalLogs] = useState([]);
   const [dynamicTrendData, setDynamicTrendData] = useState([]);
   const [aiSummary, setAiSummary] = useState({
     bpStatus: "Stable",
@@ -276,6 +277,16 @@ const Dashboard = () => {
 
       if (res.ok) {
         alert('Report uploaded successfully!');
+        // Add to local logs
+        setLocalLogs(prev => [
+          {
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: `Report uploaded: ${file.name}`,
+            type: 'log',
+            icon: <FileText size={14} className="text-blue-500" />
+          },
+          ...prev
+        ]);
       } else {
         const errorData = await res.json().catch(() => ({}));
         alert(`Failed to upload report. Status: ${res.status}. Error: ${errorData.message || 'Unknown'}`);
@@ -318,50 +329,63 @@ const Dashboard = () => {
       {(() => {
         const sys = parseInt(vitals.bpSys) || 120;
         const dia = parseInt(vitals.bpDia) || 80;
-        const config = sys > 140 
-          ? {
-              color: 'red',
-              title: 'High Blood Pressure Detected',
-              message: `Patient's blood pressure spiked to `,
-              suggestion: 'Immediate attention recommended.',
-              icon: <AlertTriangle size={28} />,
-              buttonClass: 'btn-primary bg-red-600 hover:bg-red-700 text-white shadow-none',
-              sectionClass: 'bg-red-500/10 dark:bg-red-500/20 text-slate-700 dark:text-slate-200 border-red-500/20',
-              iconBg: 'bg-red-500/20 text-red-600 dark:text-red-400',
-              titleColor: 'text-red-600 dark:text-red-400',
-              textColor: 'text-slate-600 dark:text-slate-300',
-              bpColor: 'text-red-700 dark:text-red-300',
-              dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }
-          : sys > 120
-            ? {
-                color: 'amber',
-                title: 'Elevated Blood Pressure',
-                message: `Patient's blood pressure is elevated at `,
-                suggestion: 'Continue monitoring and ensure rest.',
-                icon: <Activity size={28} className="animate-pulse" />,
-                buttonClass: 'btn-primary bg-amber-500 hover:bg-amber-600 text-white shadow-none',
-                sectionClass: 'bg-amber-500/10 dark:bg-amber-500/20 text-slate-700 dark:text-slate-200 border-amber-500/20',
-                iconBg: 'bg-amber-500/20 text-amber-600 dark:text-amber-400',
-                titleColor: 'text-amber-600 dark:text-amber-400',
-                textColor: 'text-slate-600 dark:text-slate-300',
-                bpColor: 'text-amber-700 dark:text-amber-300',
-                dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }
-            : {
-                color: 'emerald',
-                title: 'Blood Pressure Normal',
-                message: `Patient's blood pressure is stable at `,
-                suggestion: 'Patient is healthy. Monitoring active.',
-                icon: <TrendingUp size={28} />,
-                buttonClass: 'btn-primary bg-emerald-500 hover:bg-emerald-600 text-white shadow-none',
-                sectionClass: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-slate-700 dark:text-slate-200 border-emerald-500/20',
-                iconBg: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
-                titleColor: 'text-emerald-600 dark:text-emerald-400',
-                textColor: 'text-slate-600 dark:text-slate-300',
-                bpColor: 'text-slate-900 dark:text-white',
-                dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              };
+        const hr = parseInt(vitals.hr) || 72;
+        const spo2 = parseInt(vitals.spo2) || 98;
+        const temp = parseFloat(vitals.temp) || 36.8;
+
+        const abnormalities = [];
+        if (sys > 140 || dia > 90) abnormalities.push("Blood Pressure");
+        if (hr > 100 || hr < 60) abnormalities.push("Heart Rate");
+        if (spo2 < 95) abnormalities.push("Oxygen Level");
+        if (temp > 38) abnormalities.push("Body Temperature");
+
+        const isAbnormal = abnormalities.length > 0;
+        
+        let config = {};
+        if (isAbnormal) {
+          const summary = abnormalities.join(", ") + (abnormalities.length > 1 ? " are abnormal" : " is abnormal");
+          const normals = [];
+          if (sys <= 140 && dia <= 90) normals.push("BP");
+          if (hr <= 100 && hr >= 60) normals.push("HR");
+          if (spo2 >= 95) normals.push("Oxygen");
+          const normalSummary = normals.length > 0 ? `. ${normals.join(", ")} are normal.` : "";
+
+          config = {
+            color: 'red',
+            title: 'Health Alert Detected',
+            message: summary + normalSummary,
+            suggestion: 'Please review the clinical protocol and contact your doctor if symptoms persist.',
+            icon: <AlertTriangle size={28} />,
+            buttonClass: 'bg-red-600 hover:bg-red-700 text-white shadow-none',
+            sectionClass: 'bg-red-500/10 dark:bg-red-500/20 text-slate-700 dark:text-slate-200 border-red-500/20',
+            iconBg: 'bg-red-500/20 text-red-600 dark:text-red-400',
+            titleColor: 'text-red-600 dark:text-red-400',
+            textColor: 'text-slate-600 dark:text-slate-300',
+            dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          };
+        } else {
+          const positiveMessages = [
+            "Your vitals are looking excellent! Keep up the great work.",
+            "Everything is within normal range. You're doing amazing!",
+            "Patient is healthy and stable. Stay strong and keep active!",
+            "Great news! Your health metrics are optimal today."
+          ];
+          const randomMsg = positiveMessages[Math.floor(new Date().getHours() / 6) % positiveMessages.length];
+          
+          config = {
+            color: 'emerald',
+            title: 'Patient Health Stable',
+            message: randomMsg,
+            suggestion: 'Monitoring active. Your vitals are perfectly normal.',
+            icon: <TrendingUp size={28} />,
+            buttonClass: 'btn-primary bg-emerald-500 hover:bg-emerald-600 text-white shadow-none',
+            sectionClass: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-slate-700 dark:text-slate-200 border-emerald-500/20',
+            iconBg: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+            titleColor: 'text-emerald-600 dark:text-emerald-400',
+            textColor: 'text-slate-600 dark:text-slate-300',
+            dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          };
+        }
 
         return showAlert && (
           <div className="relative overflow-hidden group">
@@ -374,9 +398,9 @@ const Dashboard = () => {
                 <div>
                   <h4 className={`${config.titleColor} font-black text-xl tracking-tight`}>{config.title}</h4>
                   <p className={`${config.textColor} mt-2 max-w-2xl leading-relaxed font-medium`}>
-                    {config.message} 
-                    <span className={`${config.bpColor} font-black underline underline-offset-4 decoration-current/20`}>{sys}/{dia} mmHg</span>. 
-                    {config.suggestion}
+                    {config.message}
+                    <br />
+                    <span className="text-xs opacity-75">{config.suggestion}</span>
                   </p>
                 </div>
               </div>
@@ -509,27 +533,32 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="glass-panel rounded-[2.5rem] p-8">
+          <div className="glass-panel rounded-[2.5rem] p-8 mt-6">
             <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">Activity</h3>
             <div className="space-y-6">
-              {(activities.length > 0 ? activities : [
+              {([...localLogs, ...activities].length > 0 ? [...localLogs, ...activities] : [
                 { time: '14:00', text: 'Monitoring Active', type: 'log' },
                 { time: '11:30', text: 'System Initialized', type: 'log' },
-              ]).map((act, i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="text-xs text-slate-400 dark:text-slate-500 font-black w-12 shrink-0 pt-1 uppercase tracking-tighter">{act.time}</div>
-                  <div className="relative pb-2">
-                    {i !== 2 && <div className="absolute top-6 left-[10px] w-[2px] h-full bg-slate-200 dark:bg-white/5"></div>}
-                    <div className="flex gap-4 items-center">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 ${
-                        act.type === 'alert' ? 'bg-[#4D6BFF]/20 text-[#4D6BFF]' :
-                        act.type === 'med' ? 'bg-blue-500/20 text-blue-500 dark:text-blue-400' :
-                        'bg-slate-200 dark:bg-white/10 text-slate-400'
-                      }`}>
-                        <div className="w-2 h-2 rounded-full bg-current"></div>
-                      </div>
-                      <p className="text-sm text-slate-700 dark:text-slate-200 font-bold tracking-tight">{act.text}</p>
+              ]).slice(0, 5).map((act, i) => (
+                <div key={i} className="flex gap-4 group">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      act.type === 'alert' ? 'bg-red-500/10 text-red-500' : 'bg-slate-100 dark:bg-white/5 text-slate-400'
+                    }`}>
+                      {act.icon || (act.type === 'alert' ? <AlertTriangle size={14} /> : <Clock size={14} />)}
                     </div>
+                    {i < 4 && <div className="w-0.5 h-full bg-slate-100 dark:bg-white/5 my-1"></div>}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-400 tabular-nums">{act.time}</span>
+                      <span className={`text-[10px] uppercase tracking-widest font-black px-1.5 py-0.5 rounded ${
+                        act.type === 'alert' ? 'bg-red-500/10 text-red-500' : 'bg-slate-100 dark:bg-white/5 text-slate-500'
+                      }`}>{act.type}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mt-1 leading-snug group-hover:text-[#4D6BFF] transition-colors">
+                      {act.text}
+                    </p>
                   </div>
                 </div>
               ))}
