@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Heart, Thermometer, Droplets, AlertTriangle, TrendingUp, Clock, FileText, Plus, X, MessageCircle, User } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -90,7 +90,7 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(true);
-  const [lastAlertLevel, setLastAlertLevel] = useState('');
+  const lastAlertLevel = useRef('');
 
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
@@ -193,13 +193,10 @@ const Dashboard = () => {
 
           // Dynamic Alert logic
           const currentLevel = newVitals.bpSys > 140 ? 'danger' : newVitals.bpSys > 120 ? 'warning' : 'success';
-          setLastAlertLevel(prev => {
-            if (prev !== currentLevel) {
-              setShowAlert(true);
-              return currentLevel;
-            }
-            return prev;
-          });
+          if (lastAlertLevel.current !== currentLevel) {
+            setShowAlert(true);
+            lastAlertLevel.current = currentLevel;
+          }
 
 
         } else if (latestData) {
