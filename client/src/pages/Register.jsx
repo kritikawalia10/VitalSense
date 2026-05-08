@@ -53,6 +53,15 @@ const Register = () => {
       }
 
       setSuccess('Registration successful! Redirecting to login...');
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        age: '',
+        gender: 'Male',
+        patientId: ''
+      });
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.message);

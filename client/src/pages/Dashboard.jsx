@@ -90,6 +90,8 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(true);
+  const [lastAlertLevel, setLastAlertLevel] = useState('');
+
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [vitals, setVitals] = useState({
@@ -183,11 +185,22 @@ const Dashboard = () => {
 
           // Update AI Summary logic
           setAiSummary({
-            bpStatus: newVitals.bpSys > 140 ? "High" : newVitals.bpSys > 130 ? "Elevated" : "Normal",
+            bpStatus: newVitals.bpSys > 140 ? "High" : newVitals.bpSys > 120 ? "Elevated" : "Normal",
             hrStatus: newVitals.hr > 100 ? "Elevated" : "Normal",
             bpTrend: newVitals.bpSys > 135 ? "trending higher than baseline" : "within normal range",
             hrTrend: newVitals.hr > 90 ? "slightly elevated" : "optimal"
           });
+
+          // Dynamic Alert logic
+          const currentLevel = newVitals.bpSys > 140 ? 'danger' : newVitals.bpSys > 120 ? 'warning' : 'success';
+          setLastAlertLevel(prev => {
+            if (prev !== currentLevel) {
+              setShowAlert(true);
+              return currentLevel;
+            }
+            return prev;
+          });
+
 
         } else if (latestData) {
           setVitals({
@@ -305,36 +318,70 @@ const Dashboard = () => {
       <AdmissionForm isOpen={isAdmissionOpen} onClose={() => setIsAdmissionOpen(false)} />
 
       {/* Alert Section */}
-      {showAlert && (
-        <div className="relative overflow-hidden group">
-          <div className="absolute inset-0 bg-red-500/5 blur-xl group-hover:bg-red-500/10 transition-colors"></div>
-          <div className="relative bg-red-500/10 border border-red-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 backdrop-blur-md">
-            <div className="flex items-start gap-6">
-              <div className="p-4 bg-red-500/20 rounded-2xl text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                <AlertTriangle size={28} />
+      {(() => {
+        const sys = parseInt(vitals.bpSys) || 120;
+        const dia = parseInt(vitals.bpDia) || 80;
+        const config = sys > 140 
+          ? {
+              color: 'red',
+              title: 'High Blood Pressure Detected',
+              message: `Patient's blood pressure spiked to `,
+              suggestion: 'Immediate attention recommended.',
+              icon: <AlertTriangle size={28} />
+            }
+          : sys > 120
+            ? {
+                color: 'amber',
+                title: 'Elevated Blood Pressure',
+                message: `Patient's blood pressure is elevated at `,
+                suggestion: 'Continue monitoring and ensure rest.',
+                icon: <Activity size={28} className="animate-pulse" />
+              }
+            : {
+                color: 'emerald',
+                title: 'Blood Pressure Normal',
+                message: `Patient's blood pressure is stable at `,
+                suggestion: 'Patient is healthy. Monitoring active.',
+                icon: <TrendingUp size={28} />
+              };
+
+        return showAlert && (
+          <div className="relative overflow-hidden group">
+            <div className={`absolute inset-0 bg-${config.color}-500/5 blur-xl group-hover:bg-${config.color}-500/10 transition-colors`}></div>
+            <div className={`relative bg-${config.color}-500/10 border border-${config.color}-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 backdrop-blur-md`}>
+              <div className="flex items-start gap-6">
+                <div className={`p-4 bg-${config.color}-500/20 rounded-2xl text-${config.color}-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]`}>
+                  {config.icon}
+                </div>
+                <div>
+                  <h4 className={`text-${config.color}-500 dark:text-${config.color}-400 font-black text-xl tracking-tight`}>{config.title}</h4>
+                  <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">
+                    {config.message} 
+                    <span className="text-slate-900 dark:text-white font-bold">{sys}/{dia} mmHg</span>. 
+                    {config.suggestion}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-red-500 dark:text-red-400 font-black text-xl tracking-tight">High Blood Pressure Detected</h4>
-                <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">Patient's blood pressure spiked to <span className="text-slate-900 dark:text-white font-bold">145/92 mmHg</span> at 14:00. Immediate attention recommended.</p>
+              <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
+                <button 
+                  onClick={() => setShowAlert(false)}
+                  className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors whitespace-nowrap"
+                >
+                  Dismiss
+                </button>
+                <button 
+                  onClick={() => setIsProtocolModalOpen(true)}
+                  className="flex-1 md:flex-none btn-primary whitespace-nowrap"
+                >
+                  Review Protocol
+                </button>
               </div>
-            </div>
-            <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
-              <button 
-                onClick={() => setShowAlert(false)}
-                className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors whitespace-nowrap"
-              >
-                Dismiss
-              </button>
-              <button 
-                onClick={() => setIsProtocolModalOpen(true)}
-                className="flex-1 md:flex-none btn-primary whitespace-nowrap"
-              >
-                Review Protocol
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+
 
       {/* Protocol Modal */}
       <ProtocolModal isOpen={isProtocolModalOpen} onClose={() => setIsProtocolModalOpen(false)} />
