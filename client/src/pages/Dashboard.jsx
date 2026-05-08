@@ -325,7 +325,11 @@ const Dashboard = () => {
               message: `Patient's blood pressure spiked to `,
               suggestion: 'Immediate attention recommended.',
               icon: <AlertTriangle size={28} />,
-              buttonClass: 'bg-red-500 hover:bg-red-600 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.4)]'
+              buttonClass: 'bg-white text-red-600 hover:bg-red-50 shadow-lg',
+              sectionClass: 'bg-gradient-to-br from-red-600 to-red-500 text-white border-red-400/30',
+              iconBg: 'bg-white/20 text-white',
+              titleColor: 'text-white',
+              textColor: 'text-red-50'
             }
           : sys > 120
             ? {
@@ -334,7 +338,11 @@ const Dashboard = () => {
                 message: `Patient's blood pressure is elevated at `,
                 suggestion: 'Continue monitoring and ensure rest.',
                 icon: <Activity size={28} className="animate-pulse" />,
-                buttonClass: 'bg-amber-500 hover:bg-amber-600 text-white shadow-[0_10px_20px_-5px_rgba(245,158,11,0.4)]'
+                buttonClass: 'bg-white text-amber-600 hover:bg-amber-50 shadow-lg',
+                sectionClass: 'bg-gradient-to-br from-amber-500 to-amber-400 text-white border-amber-300/30',
+                iconBg: 'bg-white/20 text-white',
+                titleColor: 'text-white',
+                textColor: 'text-amber-50'
               }
             : {
                 color: 'emerald',
@@ -342,22 +350,26 @@ const Dashboard = () => {
                 message: `Patient's blood pressure is stable at `,
                 suggestion: 'Patient is healthy. Monitoring active.',
                 icon: <TrendingUp size={28} />,
-                buttonClass: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)]'
+                buttonClass: 'bg-white text-emerald-600 hover:bg-emerald-50 shadow-lg',
+                sectionClass: 'bg-gradient-to-br from-emerald-500 to-emerald-400 text-white border-emerald-300/30',
+                iconBg: 'bg-white/20 text-white',
+                titleColor: 'text-white',
+                textColor: 'text-emerald-50'
               };
 
         return showAlert && (
           <div className="relative overflow-hidden group">
-            <div className={`absolute inset-0 bg-${config.color}-500/5 blur-xl group-hover:bg-${config.color}-500/10 transition-colors`}></div>
-            <div className={`relative bg-${config.color}-500/10 border border-${config.color}-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 backdrop-blur-md`}>
+            <div className={`absolute inset-0 bg-white/5 blur-xl transition-colors`}></div>
+            <div className={`relative ${config.sectionClass} border rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 backdrop-blur-md shadow-2xl`}>
               <div className="flex items-start gap-6">
-                <div className={`p-4 bg-${config.color}-500/20 rounded-2xl text-${config.color}-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]`}>
+                <div className={`p-4 ${config.iconBg} rounded-2xl shadow-inner`}>
                   {config.icon}
                 </div>
                 <div>
-                  <h4 className={`text-${config.color}-500 dark:text-${config.color}-400 font-black text-xl tracking-tight`}>{config.title}</h4>
-                  <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">
+                  <h4 className={`${config.titleColor} font-black text-xl tracking-tight`}>{config.title}</h4>
+                  <p className={`${config.textColor} mt-2 max-w-2xl leading-relaxed font-medium`}>
                     {config.message} 
-                    <span className="text-slate-900 dark:text-white font-bold">{sys}/{dia} mmHg</span>. 
+                    <span className="text-white font-black underline underline-offset-4 decoration-white/30">{sys}/{dia} mmHg</span>. 
                     {config.suggestion}
                   </p>
                 </div>
@@ -365,7 +377,7 @@ const Dashboard = () => {
               <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
                 <button 
                   onClick={() => setShowAlert(false)}
-                  className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors whitespace-nowrap"
+                  className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-white/70 hover:text-white transition-colors whitespace-nowrap"
                 >
                   Dismiss
                 </button>
