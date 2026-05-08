@@ -15,6 +15,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  useEffect(() => {
+    // Ping the server on mount to wake it up if it's on a free tier (Render cold start)
+    const pingServer = async () => {
+      try {
+        await fetch('https://vitalsense-jvbd.onrender.com/api/health');
+      } catch (err) {
+        console.log('Server wake-up ping failed, but that is okay.');
+      }
+    };
+    pingServer();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,6 +37,11 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
+    // Start a timer to show "Waking up" message if it takes long
+    const timer = setTimeout(() => {
+      setIsWakingUp(true);
+    }, 3000);
 
     try {
       const endpoint = 'https://vitalsense-jvbd.onrender.com/api/auth/login';
@@ -59,7 +77,9 @@ const Login = () => {
     } catch (err) {
       setError(err.message);
     } finally {
+      clearTimeout(timer);
       setLoading(false);
+      setIsWakingUp(false);
     }
   };
 
@@ -192,9 +212,14 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2"
             >
-              {loading ? 'Authenticating...' : 'Sign In'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  {isWakingUp ? 'Waking up server...' : 'Authenticating...'}
+                </>
+              ) : 'Sign In'}
             </button>
           </form>
 

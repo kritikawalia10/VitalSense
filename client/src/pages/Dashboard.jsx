@@ -324,7 +324,8 @@ const Dashboard = () => {
               title: 'High Blood Pressure Detected',
               message: `Patient's blood pressure spiked to `,
               suggestion: 'Immediate attention recommended.',
-              icon: <AlertTriangle size={28} />
+              icon: <AlertTriangle size={28} />,
+              buttonClass: 'bg-red-500 hover:bg-red-600 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.4)]'
             }
           : sys > 120
             ? {
@@ -332,14 +333,16 @@ const Dashboard = () => {
                 title: 'Elevated Blood Pressure',
                 message: `Patient's blood pressure is elevated at `,
                 suggestion: 'Continue monitoring and ensure rest.',
-                icon: <Activity size={28} className="animate-pulse" />
+                icon: <Activity size={28} className="animate-pulse" />,
+                buttonClass: 'bg-amber-500 hover:bg-amber-600 text-white shadow-[0_10px_20px_-5px_rgba(245,158,11,0.4)]'
               }
             : {
                 color: 'emerald',
                 title: 'Blood Pressure Normal',
                 message: `Patient's blood pressure is stable at `,
                 suggestion: 'Patient is healthy. Monitoring active.',
-                icon: <TrendingUp size={28} />
+                icon: <TrendingUp size={28} />,
+                buttonClass: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)]'
               };
 
         return showAlert && (
@@ -368,7 +371,7 @@ const Dashboard = () => {
                 </button>
                 <button 
                   onClick={() => setIsProtocolModalOpen(true)}
-                  className="flex-1 md:flex-none btn-primary whitespace-nowrap"
+                  className={`flex-1 md:flex-none py-2 md:py-3 px-4 md:px-6 rounded-xl text-[11px] md:text-sm font-bold transition-all whitespace-nowrap ${config.buttonClass}`}
                 >
                   Review Protocol
                 </button>
