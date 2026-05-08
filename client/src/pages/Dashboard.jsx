@@ -16,8 +16,23 @@ const trendData = [
   { time: '20:00', hr: 70, bpSys: 118, bpDia: 76 },
 ];
 
-const ProtocolModal = ({ isOpen, onClose }) => {
+const ProtocolModal = ({ isOpen, onClose, vitals }) => {
   if (!isOpen) return null;
+
+  const sys = parseInt(vitals.bpSys) || 120;
+  const dia = parseInt(vitals.bpDia) || 80;
+  const hr = parseInt(vitals.hr) || 72;
+  const spo2 = parseInt(vitals.spo2) || 98;
+  const temp = parseFloat(vitals.temp) || 36.8;
+
+  const abnormalities = [];
+  if (sys > 140 || dia > 90) abnormalities.push("Blood Pressure");
+  if (hr > 100 || hr < 60) abnormalities.push("Heart Rate");
+  if (spo2 < 95) abnormalities.push("Oxygen Level");
+  if (temp > 38) abnormalities.push("Body Temperature");
+
+  const isAbnormal = abnormalities.length > 0;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -25,12 +40,16 @@ const ProtocolModal = ({ isOpen, onClose }) => {
         <div className="absolute -inset-10 bg-[#4D6BFF]/10 blur-[80px] rounded-full z-0 pointer-events-none"></div>
         <div className="relative z-10 flex justify-between items-start mb-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-red-500/20 text-red-500 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-              <AlertTriangle size={24} />
+            <div className={`p-3 ${isAbnormal ? 'bg-red-500/20 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-emerald-500/20 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} rounded-xl`}>
+              {isAbnormal ? <AlertTriangle size={24} /> : <TrendingUp size={24} />}
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Clinical Protocol</h3>
-              <p className="text-sm font-bold text-red-500 tracking-widest uppercase">High Blood Pressure</p>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                {isAbnormal ? 'Clinical Protocol' : 'Health Maintenance'}
+              </h3>
+              <p className={`text-sm font-bold tracking-widest uppercase ${isAbnormal ? 'text-red-500' : 'text-emerald-500'}`}>
+                {isAbnormal ? 'Attention Required' : 'Status: Stable'}
+              </p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-500">
@@ -39,25 +58,49 @@ const ProtocolModal = ({ isOpen, onClose }) => {
         </div>
         
         <div className="space-y-4 relative z-10 text-slate-700 dark:text-slate-300 font-medium">
-          <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
-            <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><Activity size={18} className="text-[#4D6BFF]"/> Immediate Actions</h4>
-            <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
-              <li>Instruct patient to sit and rest quietly for 5 minutes.</li>
-              <li>Re-measure blood pressure to confirm reading.</li>
-              <li>Assess for symptoms: severe headache, chest pain, or shortness of breath.</li>
-            </ul>
-          </div>
-          <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
-            <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><FileText size={18} className="text-[#8BA8FF]"/> Medication Guidelines</h4>
-            <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
-              <li>If BP remains &gt; 140/90 mmHg, review current antihypertensive medications.</li>
-              <li>Consider administering PRN Nifedipine or Captopril per standing orders.</li>
-              <li><strong className="text-red-500">Contact attending physician</strong> if systolic &gt; 180 mmHg or diastolic &gt; 120 mmHg.</li>
-            </ul>
-          </div>
+          {isAbnormal ? (
+            <>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><Activity size={18} className="text-[#4D6BFF]"/> Immediate Actions</h4>
+                <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
+                  <li>Instruct patient to sit and rest quietly for 5 minutes.</li>
+                  <li>Re-measure {abnormalities.join(" & ")} to confirm reading.</li>
+                  <li>Assess for symptoms: severe headache, chest pain, or shortness of breath.</li>
+                  {spo2 < 95 && <li>Check oxygen source and ensure proper placement of cannula/mask.</li>}
+                </ul>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><FileText size={18} className="text-[#8BA8FF]"/> Next Steps</h4>
+                <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
+                  <li>Review current medications and any recent changes.</li>
+                  <li>Document findings and response to immediate actions.</li>
+                  <li><strong className="text-red-500">Contact attending physician</strong> if symptoms persist or vitals do not stabilize.</li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><TrendingUp size={18} className="text-emerald-500"/> Preventive Care</h4>
+                <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
+                  <li>Continue regular monitoring of vitals as scheduled.</li>
+                  <li>Maintain proper hydration and a balanced diet.</li>
+                  <li>Ensure 7-8 hours of quality sleep for optimal recovery.</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight"><Clock size={18} className="text-[#4D6BFF]"/> Daily Routine</h4>
+                <ul className="list-decimal list-outside ml-4 space-y-2 text-sm leading-relaxed">
+                  <li>Take all prescribed medications on time.</li>
+                  <li>Perform light stretching or walking if permitted by doctor.</li>
+                  <li>Record any unusual symptoms in the activity log.</li>
+                </ul>
+              </div>
+            </>
+          )}
         </div>
         
-        <button onClick={onClose} className="w-full btn-primary mt-6 relative z-10">
+        <button onClick={onClose} className={`w-full py-4 rounded-2xl font-bold mt-6 relative z-10 transition-all ${isAbnormal ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg'}`}>
           Acknowledge & Close
         </button>
       </div>
@@ -426,7 +469,11 @@ const Dashboard = () => {
 
 
       {/* Protocol Modal */}
-      <ProtocolModal isOpen={isProtocolModalOpen} onClose={() => setIsProtocolModalOpen(false)} />
+      <ProtocolModal 
+        isOpen={isProtocolModalOpen} 
+        onClose={() => setIsProtocolModalOpen(false)} 
+        vitals={vitals}
+      />
 
       {/* Vitals Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
