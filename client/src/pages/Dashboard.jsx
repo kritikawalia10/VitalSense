@@ -329,7 +329,9 @@ const Dashboard = () => {
               sectionClass: 'bg-gradient-to-br from-red-600 to-red-500 text-white border-red-400/30',
               iconBg: 'bg-white/20 text-white',
               titleColor: 'text-white',
-              textColor: 'text-red-50'
+              textColor: 'text-red-50',
+              bpColor: 'text-white',
+              dismissColor: 'text-white/70 hover:text-white'
             }
           : sys > 120
             ? {
@@ -342,7 +344,9 @@ const Dashboard = () => {
                 sectionClass: 'bg-gradient-to-br from-amber-500 to-amber-400 text-white border-amber-300/30',
                 iconBg: 'bg-white/20 text-white',
                 titleColor: 'text-white',
-                textColor: 'text-amber-50'
+                textColor: 'text-amber-50',
+                bpColor: 'text-white',
+                dismissColor: 'text-white/70 hover:text-white'
               }
             : {
                 color: 'emerald',
@@ -350,11 +354,13 @@ const Dashboard = () => {
                 message: `Patient's blood pressure is stable at `,
                 suggestion: 'Patient is healthy. Monitoring active.',
                 icon: <TrendingUp size={28} />,
-                buttonClass: 'bg-white text-emerald-600 hover:bg-emerald-50 shadow-lg',
-                sectionClass: 'bg-gradient-to-br from-emerald-500 to-emerald-400 text-white border-emerald-300/30',
-                iconBg: 'bg-white/20 text-white',
-                titleColor: 'text-white',
-                textColor: 'text-emerald-50'
+                buttonClass: 'btn-primary bg-emerald-500 hover:bg-emerald-600 text-white shadow-none',
+                sectionClass: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-slate-700 dark:text-slate-200 border-emerald-500/20',
+                iconBg: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+                titleColor: 'text-emerald-600 dark:text-emerald-400',
+                textColor: 'text-slate-600 dark:text-slate-300',
+                bpColor: 'text-slate-900 dark:text-white',
+                dismissColor: 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
               };
 
         return showAlert && (
@@ -369,7 +375,7 @@ const Dashboard = () => {
                   <h4 className={`${config.titleColor} font-black text-xl tracking-tight`}>{config.title}</h4>
                   <p className={`${config.textColor} mt-2 max-w-2xl leading-relaxed font-medium`}>
                     {config.message} 
-                    <span className="text-white font-black underline underline-offset-4 decoration-white/30">{sys}/{dia} mmHg</span>. 
+                    <span className={`${config.bpColor} font-black underline underline-offset-4 decoration-current/20`}>{sys}/{dia} mmHg</span>. 
                     {config.suggestion}
                   </p>
                 </div>
@@ -377,7 +383,7 @@ const Dashboard = () => {
               <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
                 <button 
                   onClick={() => setShowAlert(false)}
-                  className="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold text-white/70 hover:text-white transition-colors whitespace-nowrap"
+                  className={`flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[11px] md:text-sm font-bold ${config.dismissColor} transition-colors whitespace-nowrap`}
                 >
                   Dismiss
                 </button>
